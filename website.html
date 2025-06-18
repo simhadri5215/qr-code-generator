@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Custom QR Code Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    color: #fff;
+  }
+  .container {
+    background: #1f1f38;
+    border-radius: 20px;
+    padding: 2.5rem 3rem;
+    max-width: 450px;
+    width: 100%;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    text-align: center;
+  }
+  h1 {
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+  }
+  label {
+    display: block;
+    margin: 1rem 0 0.5rem;
+    font-weight: 600;
+    text-align: left;
+  }
+  input[type="text"], input[type="number"], input[type="color"] {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+    transition: box-shadow 0.3s ease;
+  }
+  input[type="text"]:focus, input[type="number"]:focus, input[type="color"]:focus {
+    box-shadow: 0 0 10px #764ba2;
+  }
+  #generate-btn, #download-btn {
+    margin-top: 1.5rem;
+    background: #764ba2;
+    border: none;
+    padding: 0.75rem 1.8rem;
+    font-size: 1.1rem;
+    color: #fff;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+  #generate-btn:hover {
+    background: #5e378b;
+    transform: scale(1.05);
+  }
+  #download-btn {
+    background: #28a745;
+    margin-top: 1rem;
+  }
+  #download-btn:hover {
+    background: #218838;
+  }
+  #qrcode {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+  }
+  small {
+    display: block;
+    margin-top: 0.5rem;
+    color: #bbb;
+    font-weight: 400;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Custom QR Code Generator</h1>
+  
+  <label for="text">Enter URL or Text</label>
+  <input type="text" id="text" placeholder="https://example.com" />
+  
+  <label for="size">QR Code Size (px)</label>
+  <input type="number" id="size" min="100" max="500" value="250" />
+  
+  <label for="color">QR Code Color</label>
+  <input type="color" id="color" value="#000000" />
+  
+  <label for="bgcolor">Background Color</label>
+  <input type="color" id="bgcolor" value="#ffffff" />
+  
+  <button id="generate-btn">Generate QR Code</button>
+  <button id="download-btn" style="display:none;">Download QR Code</button>
+  
+  <div id="qrcode"></div>
+</div>
+
+<!-- QRCode.js Library CDN -->
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+  const generateBtn = document.getElementById('generate-btn');
+  const downloadBtn = document.getElementById('download-btn');
+  const qrCodeContainer = document.getElementById('qrcode');
+
+  let qr;
+
+  function clearQRCode() {
+    qrCodeContainer.innerHTML = '';
+  }
+
+  function generateQRCode() {
+    const text = document.getElementById('text').value.trim();
+    const size = parseInt(document.getElementById('size').value);
+    const color = document.getElementById('color').value;
+    const bgcolor = document.getElementById('bgcolor').value;
+
+    if (!text) {
+      alert('Please enter text or URL to generate QR code!');
+      return;
+    }
+    if (size < 100 || size > 500 || isNaN(size)) {
+      alert('Size must be between 100 and 500.');
+      return;
+    }
+
+    clearQRCode();
+
+    qr = new QRCode(qrCodeContainer, {
+      text: text,
+      width: size,
+      height: size,
+      colorDark: color,
+      colorLight: bgcolor,
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    downloadBtn.style.display = 'block';
+  }
+
+  function downloadQRCode() {
+    if (!qr) return;
+    
+    // The QR code generated is inside qrCodeContainer as a <canvas> or <img>
+    const qrElement = qrCodeContainer.querySelector('canvas') || qrCodeContainer.querySelector('img');
+
+    if (qrElement) {
+      const link = document.createElement('a');
+      if (qrElement.tagName === 'CANVAS') {
+        link.href = qrElement.toDataURL('image/png');
+      } else if (qrElement.tagName === 'IMG') {
+        link.href = qrElement.src;
+      }
+      link.download = 'qr-code.png';
+      link.click();
+    }
+  }
+
+  generateBtn.addEventListener('click', generateQRCode);
+  downloadBtn.addEventListener('click', downloadQRCode);
+
+  // Optional: generate a default QR code on page load
+  window.onload = () => {
+    document.getElementById('text').value = 'https://example.com';
+    generateQRCode();
+  };
+</script>
+
+</body>
+</html>
